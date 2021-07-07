@@ -107,4 +107,23 @@ router.delete("/:id", async (req, res) => {
     }
 })
 
+router.get("/:id/messages", async (req, res) => {
+    try{
+        const post = await Posts.findById(req.params.id);
+        if (!post) {
+            res.status(404).json({
+                message: "The post with the specified ID does not exist"
+            })
+        } else {
+            const messages = await Posts.findPostComments(req.params.id);
+            res.json(messages);
+        }
+    } catch (err) {
+        res.status(500).json({
+            message: "The post information could not be retrieved",
+            error: err.message
+        })
+    }
+})
+
 module.exports = router;
