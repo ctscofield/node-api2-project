@@ -38,13 +38,17 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-    if (!req.body.title || !req.body.contents) {
-        res.status(400).json({message: "Please provide title and contents for the post"});
+    const { title, contents } = req.body;
+    if (!title || !contents) {
+        res.status(400).json({
+            message: "Please provide title and contents for the post"});
     } else {
-        const { title, contents } = req.body;
         Posts.insert({title, contents})
-            .then(posts => {
-                res.status(201).json(posts);
+            .then(({id}) => {
+                return Posts.findById(id);
+            })
+            .then(post => {
+                res.status(201).json(post);
             })
             .catch(err => {
                 res.status(500).json({
