@@ -56,25 +56,35 @@ router.post("/", (req, res) => {
 })
 
 router.put("/:id", (req, res) => {
-    const { id } = req.params;
     const { title, contents } = req.body;
-    if (!id) {
-        res.status(404).json({message: "The post with the specified ID does not exist"});
+    if (!title || !contents) {
+        res.status(400).json({message: "Please provide title and contents for the post"});
     } else {
-        Posts.update(id, { title, contents })
-            .then(updated => {
-                if (!title || !contents) {
-                    res.status(400).json({message: "Please provide title and contents for the post"});
+        Posts.findById(req.params.id)
+            .then(post => {
+                if (!post) {
+                    res.status(404).json({
+                        message: "The post with the specified ID does not exist"});
                 } else {
-                    res.status(200).json(updated);
+                    return Posts.update(req.params.id, req.body);
+                }
+            })
+            .then(data => {
+                if (data) {
+                    return Posts.findById(req.params.id);
+                }
+            })
+            .then(post => {
+                if (post) {
+                    res.json(post)
                 }
             })
             .catch(err => {
                 res.status(500).json({
-                    message: "The post information could not be modified",
+                    message: "The post information could not be retrieved",
                     error: err.message
-                });
-            })
+                })
+            })           
     }    
 })
 
